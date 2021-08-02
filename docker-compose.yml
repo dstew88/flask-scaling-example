@@ -1,0 +1,45 @@
+version: "3.7"
+
+services:
+  redis:
+    image: redis
+    networks:
+      - application-network
+
+  non-blocking-worker:
+    build:
+      context: ./flask_server/
+    command: celery -A app.api.task_workers.blocking_task_worker.celery_instance worker --loglevel=info
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    networks:
+      - application-network
+
+  flask-server-instance:
+    build:
+      context: ./flask_server/
+    command: gunicorn flask_server:app -w 2 --threads 2 -b 0.0.0.0:5000
+    depends_on:
+      - redis
+      - non-blocking-worker
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    networks:
+      - application-network
+  
+  nginx:
+    build:
+      context: ./nginx/
+    depends_on:
+      - flask-server-instance
+    networks:
+      - application-network
+    ports:
+      - "8080:80"
+
+networks:
+  application-network:
