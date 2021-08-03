@@ -9,7 +9,7 @@ services:
   non-blocking-worker:
     build:
       context: ./flask_server/
-    command: celery -A app.api.task_workers.blocking_task_worker.celery_instance worker --loglevel=info
+    command: celery -A app.api worker --loglevel=info
     depends_on:
       - redis
     environment:

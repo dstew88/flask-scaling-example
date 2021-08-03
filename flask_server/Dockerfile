@@ -15,5 +15,3 @@ RUN pip3 install -r requirements.txt
 RUN chown -R app /opt/app/
 
 USER app
-
-#CMD ["gunicorn", "flask_server:app", "-w", "2", "--threads", "2", "-b", "0.0.0.0:5000"]
